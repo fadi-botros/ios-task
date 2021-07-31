@@ -1,6 +1,11 @@
 import UIKit
 import RxSwift
 
+struct CachedImageData {
+    let image: UIImage?
+    let cellHeight: CGFloat
+}
+
 /**
  The view which displays the list of campaigns. It is configured in the storyboard (Main.storyboard). The corresponding
  view controller is the `CampaignsListingViewController`.
@@ -50,6 +55,12 @@ class ListingDataSource: NSObject, UICollectionViewDataSource, UICollectionViewD
 
     /** The campaigns that need to be displayed. */
     let campaigns: [CampaignListingView.Campaign]
+    
+    /** Disposable bag for RxSwift */
+    var disposables: [IndexPath: Disposable] = [:]
+    
+    /** Cached heights */
+    private var heights: [IndexPath: CGFloat] = [:]
 
     /**
      Designated initializer.
@@ -70,6 +81,11 @@ class ListingDataSource: NSObject, UICollectionViewDataSource, UICollectionViewD
         let reuseIdentifier =  CampaignListingView.Cells.campaignCell.rawValue
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
         if let campaignCell = cell as? CampaignCell {
+            self.disposables[indexPath] = campaignCell.heightObservable.subscribe(onNext: { [weak self, weak collectionView] height in
+                self?.heights[indexPath] = height
+                collectionView?.collectionViewLayout.invalidateLayout()
+                collectionView?.layoutSubviews()
+            })
             campaignCell.moodImage = campaign.moodImage
             campaignCell.name = campaign.name
             campaignCell.descriptionText = campaign.description
@@ -78,10 +94,10 @@ class ListingDataSource: NSObject, UICollectionViewDataSource, UICollectionViewD
         }
         return cell
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.size.width, height: 450)
+        return CGSize(width: collectionView.frame.size.width, height: heights[indexPath] ?? 200.0)
     }
 
 }
