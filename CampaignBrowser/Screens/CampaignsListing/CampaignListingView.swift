@@ -58,7 +58,7 @@ class ListingDataSource: NSObject, UICollectionViewDataSource, UICollectionViewD
     
     /** Disposable bag for RxSwift */
     var disposables: [IndexPath: Disposable] = [:]
-    
+
     /** Cached heights */
     private var heights: [IndexPath: CGFloat] = [:]
 
@@ -94,7 +94,7 @@ class ListingDataSource: NSObject, UICollectionViewDataSource, UICollectionViewD
         }
         return cell
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.size.width, height: heights[indexPath] ?? 200.0)
